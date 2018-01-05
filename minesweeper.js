@@ -12,6 +12,7 @@ const generatePlayerBoard = (numberOfRows, numberOfColumns) =>
     board.push(row);
 
   } // row generator
+
   return board;
 
 } // end generatePlayerBoard function
@@ -45,10 +46,67 @@ const generateBombBoard = (numberOfRows, numberOfColumns, numberOfBombs) =>
   return board;
 }
 
-const printBoard = (board) =>
+// This is the method I don't understand
+const getNumberOfNeighborBombs = (bombBoard, rowIndex, columnIndex) =>
 {
-  board.map(row => row.join(' | '));
+  const neighborOffsets = [
+    [-1, -1], [-1, 0], [-1, 0],
+    [0, -1], [0, 1],
+    [1, -1], [1, 0], [1, 1]
+  ];
+
+  const numberOfRows = bombBoard.length;
+  const numberOfColumns = bombBoard[0].length;
+  let numberOfBombs = 0;
+
+  neighborOffsets.forEach(offset => {
+    const neighborRowIndex = rowIndex + offset[0]; // Why just the 0th element?
+    const neighborColumnIndex = columnIndex + offset[1]; // Same here for 1st?
+    if(neighborRowIndex >= 0 && neighborRowIndex < numberOfRows &&
+      neighborColumnIndex >= 0 && neighborColumnIndex < numberOfColumns)
+      {
+        if(bombBoard[neighborRowIndex][neighborColumnIndex] === 'B')
+        {
+          numberOfBombs++;
+        }
+      }
+  });
+  return numberOfBombs;
 }
 
-printBoard(generatePlayerBoard);
-//console.log(generateBombBoard(3, 4, 5));
+const flipTile = (playerBoard, bombBoard, rowIndex, columnIndex) =>
+{
+  if(playerBoard[rowIndex][columnIndex] != ' ')
+  {
+    console.log("This tile has already been flipped!")
+    return;
+  }
+  else if (bombBoard[rowIndex][columnIndex] === 'B')
+  {
+      playerBoard[rowIndex][columnIndex] = 'B';
+  }
+  else
+  {
+    playerBoard[rowIndex][columnIndex] = getNumberOfNeighborBombs(bombBoard,
+    rowIndex, columnIndex);
+  }
+
+}
+
+const printBoard = printInput =>
+{
+  console.log(printInput.map(row => row.join(' | ')).join('\n'));
+}
+
+let playerBoard = generatePlayerBoard(4, 4);
+let bombBoard = generateBombBoard(4, 4, 5);
+
+console.log("Player board:");
+printBoard(playerBoard);
+
+console.log("Bomb board:");
+printBoard(bombBoard);
+
+flipTile(playerBoard, bombBoard, 2, 2);
+console.log("Updated Player Board:");
+printBoard(playerBoard);
